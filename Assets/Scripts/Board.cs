@@ -13,6 +13,15 @@ public class Board : MonoBehaviour {
 	};
 	List<Node> m_allNodes = new List<Node>();
 	public List<Node> AllNodes { get { return m_allNodes; } }
+	Node m_playerNode;
+	public Node PlayerNode { get { return m_playerNode; } }
+	PlayerMover m_player;
+	Node m_goalNode;
+	public Node GoalNode { get{ return m_goalNode; } }
+	public GameObject goalPrefab;
+	public float drawGoalTime = 2f;
+	public float drawGoalDelay = 2f;
+	public iTween.EaseType drawGoalEaseType = iTween.EaseType.easeOutExpo;
 
 	public void GetNodeList() {
 		Node[] nList = GameObject.FindObjectsOfType<Node>();
@@ -20,12 +29,47 @@ public class Board : MonoBehaviour {
 	}
 
 	private void Awake() {
+		m_player = Object.FindObjectOfType<PlayerMover>().GetComponent<PlayerMover>();
 		GetNodeList();
+		m_goalNode = FindGoalNode();
 	}
 
 	public Node FindNodeAt(Vector3 pos) {
         Vector2 boardCoord = Utility.Vector2Round(new Vector2(pos.x, pos.z));
         return m_allNodes.Find(n => n.Coordinate == boardCoord);
     }
+
+	public Node FindPlayerNode() {
+		if (m_player != null && !m_player.isMoving) {
+			return FindNodeAt(m_player.transform.position);
+		}
+		return null;
+	}
+
+	public void UpdatePlayerNode() {
+		m_playerNode = FindPlayerNode();
+	}
+
+	public Node FindGoalNode() {
+		return m_allNodes.Find(n => n.isLevelGoal);
+	}
+
+	public void DrawGoal() {
+		if (goalPrefab != null && m_goalNode != null) {
+			GameObject goalInstance = Instantiate(goalPrefab, m_goalNode.transform.position, Quaternion.identity);
+			iTween.ScaleFrom(goalInstance, iTween.Hash(
+				"scale", Vector3.zero,
+				"time", drawGoalTime,
+				"delay", drawGoalDelay,
+				"easetype", drawGoalEaseType
+			));
+		}
+	}
+
+	public void InitBoard() {
+		if (m_playerNode != null) {
+			m_playerNode.InitNode();
+		}
+	}
 
 }
