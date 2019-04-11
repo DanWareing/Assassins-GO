@@ -22,6 +22,12 @@ public class Board : MonoBehaviour {
 	public float drawGoalTime = 2f;
 	public float drawGoalDelay = 2f;
 	public iTween.EaseType drawGoalEaseType = iTween.EaseType.easeOutExpo;
+	public List<Transform> capturePositions;
+	int m_currentCapturePosition = 0;
+	public int CurrentCapturePosition {
+		get { return m_currentCapturePosition;}
+		set { m_currentCapturePosition = value;}
+	}
 
 	public void GetNodeList() {
 		Node[] nList = GameObject.FindObjectsOfType<Node>();
@@ -44,6 +50,16 @@ public class Board : MonoBehaviour {
 			return FindNodeAt(m_player.transform.position);
 		}
 		return null;
+	}
+
+	public List<EnemyManager> FindEnemiesAt(Node node) {
+		List<EnemyManager> foundEnemies = new List<EnemyManager>();
+		EnemyManager[] enemies = Object.FindObjectsOfType<EnemyManager>() as EnemyManager[];
+		foreach (EnemyManager enemy in enemies) {
+			EnemyMover mover = enemy.GetComponent<EnemyMover>();
+			if (mover.CurrentNode == node) foundEnemies.Add(enemy);
+		}
+		return foundEnemies;
 	}
 
 	public void UpdatePlayerNode() {
@@ -70,6 +86,10 @@ public class Board : MonoBehaviour {
 		if (m_playerNode != null) {
 			m_playerNode.InitNode();
 		}
+	}
+
+	void OnDrawGizmmos() {
+
 	}
 
 }
